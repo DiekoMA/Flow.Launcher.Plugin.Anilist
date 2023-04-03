@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <AssemblyName>Flow.Launcher.Plugin.Anilist</AssemblyName>
+    <PackageId>Flow.Launcher.Plugin.Anilist</PackageId>
+    <Authors>MayowaAK</Authors>
+    <PackageProjectUrl>https://github.com/MayowaAK/Flow.Launcher.Plugin.Anilist</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MayowaAK/Flow.Launcher.Plugin.Anilist</RepositoryUrl>
+    <PackageTags>flow-launcher flow-plugin</PackageTags>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AniListNet" Version="1.3.4" />
+    <PackageReference Include="Flow.Launcher.Plugin" Version="4.0.0" />
+  </ItemGroup>
+
+</Project>
