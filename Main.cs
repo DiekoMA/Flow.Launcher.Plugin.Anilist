@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using AniListNet;
 using AniListNet.Objects;
 using AniListNet.Parameters;
-using Flow.Launcher.Plugin;
-using Flow.Launcher.Plugin.Anilist.Utils;
 
 namespace Flow.Launcher.Plugin.Anilist
 {
@@ -46,7 +42,7 @@ namespace Flow.Launcher.Plugin.Anilist
                     results.Add(new Result
                     {
                         Title = anime.Title.EnglishTitle ?? anime.Title.RomajiTitle,
-                        SubTitle = $"ID: {anime.MalId} \nFormat: {anime.Format} \nStatus: {anime.Status}",
+                        SubTitle = $"Format: {anime.Format} \nStatus: {anime.Status}",
                         IcoPath = anime.Cover.ExtraLargeImageUrl.ToString(),
                         Action = e =>
                         {
@@ -59,21 +55,5 @@ namespace Flow.Launcher.Plugin.Anilist
             }
             return results;
         }
-        
-        /*public List<Result> Query(Query query)
-        {
-            var result = new Result
-            {
-                Title = "Hello World from CSharp",
-                SubTitle = $"Query: {query.Search}",
-                Action = c =>
-                {
-                    _context.API.ShowMsg("Test", "Bla");
-                    return true;
-                },
-                IcoPath = "Images/app.png"
-            };
-            return new List<Result> { result };
-        }*/
     }
 }

@@ -6,7 +6,7 @@
     "Author": "DiekoMA",
     "Version": "1.0.0",
     "Language": "csharp",
-    "Website": "https://github.com/MayowaAK/Flow.Launcher.Plugin.Anilist",
-    "IcoPath": "Assets/AniListlogo.png",
+    "Website": "https://github.com/DiekoMA/Flow.Launcher.Plugin.Anilist",
+    "IcoPath": "Assets\\AniListlogo.png",
     "ExecuteFileName": "Flow.Launcher.Plugin.Anilist.dll"
 }
