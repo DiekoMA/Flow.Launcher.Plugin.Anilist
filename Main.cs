@@ -48,7 +48,7 @@ namespace Flow.Launcher.Plugin.Anilist
                     results.Add(new Result
                     {
                         Title = anime.Title.EnglishTitle ?? anime.Title.RomajiTitle,
-                        SubTitle = $"Format: {anime.Format} \nStatus: {anime.Status} \n{anime.Entry.Status}",
+                        SubTitle = $"Format: {anime.Format} \nStatus: {anime.Status}",
                         IcoPath = anime.Cover.ExtraLargeImageUrl.ToString(),
                         Action = e =>
                         {
@@ -74,37 +74,52 @@ namespace Flow.Launcher.Plugin.Anilist
                 new ()
                 {
                     Title = "Add to list",
-                    IcoPath = "Assets\\add.svg",
+                    IcoPath = "Assets\\AniListlogo.png",
                     AsyncAction = async c =>
                     {
-                        var anilistEntry = await _client.SearchMediaAsync(new SearchMediaFilter
+                        try
                         {
-                            Query = selectedResult.Title,
-                            Type = MediaType.Anime,
-                            Sort = MediaSort.Popularity
-                        });
-                        await _client.SaveMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id, new MediaEntryMutation()
+                            var anilistEntry = await _client.SearchMediaAsync(new SearchMediaFilter
+                            {
+                                Query = selectedResult.Title,
+                                Type = MediaType.Anime,
+                                Sort = MediaSort.Popularity
+                            });
+                            await _client.SaveMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id, new MediaEntryMutation()
+                            {
+                                StartDate = DateTime.Today,
+                                Progress = 0,
+                                Status = MediaEntryStatus.Planning
+                            });
+                        }
+                        catch (Exception)
                         {
-                            StartDate = DateTime.Today,
-                            Progress = 0,
-                            Status = MediaEntryStatus.Planning
-                        });
+                            _context.API.ShowMsgError("Not Authenticated", "Please add your token in the plugin settings");
+                        }
                         return true;
                     },
                 },
                 new ()
                 {
                     Title = "Remove from list",
-                    IcoPath = "Assets\\remove.svg",
+                    IcoPath = "Assets\\AniListlogo.png",
                     AsyncAction = async c =>
                     {
-                        var anilistEntry = await _client.SearchMediaAsync(new SearchMediaFilter
+                        try
                         {
-                            Query = selectedResult.Title,
-                            Type = MediaType.Anime,
-                            Sort = MediaSort.Popularity
-                        });
-                        await _client.DeleteMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id);
+                            var anilistEntry = await _client.SearchMediaAsync(new SearchMediaFilter
+                            {
+                                Query = selectedResult.Title,
+                                Type = MediaType.Anime,
+                                Sort = MediaSort.Popularity
+                            });
+                            await _client.DeleteMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id);
+                        }
+                        catch (Exception)
+                        {
+                            _context.API.ShowMsgError("Not Authenticated", "Please add your token in the plugin settings");   
+                        }
+
                         return true;
                     },
                 }
