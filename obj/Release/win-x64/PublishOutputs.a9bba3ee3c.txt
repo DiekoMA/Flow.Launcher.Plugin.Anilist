@@ -1,0 +1,10 @@
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\plugin.json
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\Assets\AniListlogo.png
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\Flow.Launcher.Plugin.Anilist.dll
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\Flow.Launcher.Plugin.Anilist.deps.json
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\AniListNet.dll
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\Flow.Launcher.Plugin.dll
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\JetBrains.Annotations.dll
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\Newtonsoft.Json.dll
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\PropertyChanged.dll
+C:\Users\Mayowa\RiderProjects\Flow.Launcher.Plugin.Anilist\bin\Release\win-x64\publish\Flow.Launcher.Plugin.Anilist.xml

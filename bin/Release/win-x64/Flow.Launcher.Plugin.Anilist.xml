@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Flow.Launcher.Plugin.Anilist</name>
+    </assembly>
+    <members>
+        <member name="T:Flow.Launcher.Plugin.Anilist.AnilistSetting">
+            <summary>
+            AnilistSetting
+            </summary>
+        </member>
+        <member name="M:Flow.Launcher.Plugin.Anilist.AnilistSetting.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+    </members>
+</doc>
