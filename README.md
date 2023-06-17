@@ -2,11 +2,8 @@
 An Anilist plugin for FlowLauncher that currently only supports searching
 
 
-[ x ] - Searching
-
-[  ] - Updating Lists
-
-[  ] - Viewing friends
+- Searching for Anime.
+- Adding Anime to your list.
 
 This project uses the AnilistNet API Wrapper (https://github.com/dentolos19/AniListNet)
 
