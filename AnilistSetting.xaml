@@ -29,7 +29,6 @@
                 Margin="5,5,5,5"/>
         </StackPanel>
         
-        
         <StackPanel Grid.Row="1" Orientation="Horizontal" Grid.Column="0" >
             <TextBlock Text="Paste your access token" VerticalAlignment="Center" />
             <PasswordBox Width="580"
@@ -43,6 +42,32 @@
                 Click="Savebutton_OnClick"/>
         </StackPanel>
         
-        
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Grid.Column="0" >
+            <TextBlock Text="Default MediaType" VerticalAlignment="Center"/>
+            <ComboBox Name="DefaultMediaTypeCB"
+                      MinWidth="580"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Center" 
+                      Margin="6,6,6,6" SelectionChanged="DefaultMediaTypeCB_SelectionChanged">
+                <ComboBoxItem Content="Anime"/>
+                <ComboBoxItem Content="Manga"/>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Grid.Column="0" >
+            <TextBlock Text="Default Sort" VerticalAlignment="Center"/>
+            <ComboBox Name="DefaultSortCB"
+                      MinWidth="580"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Center" 
+                      Margin="6,6,6,6" SelectionChanged="DefaultSortCB_SelectionChanged">
+                <ComboBoxItem Content="Relevance"/>
+                <ComboBoxItem Content="Score"/>
+                <ComboBoxItem Content="Popularity"/>
+                <ComboBoxItem Content="Trending"/>
+                <ComboBoxItem Content="Favorites"/>
+            </ComboBox>
+        </StackPanel>
+
     </Grid>
 </UserControl>
