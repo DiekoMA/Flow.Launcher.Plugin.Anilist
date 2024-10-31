@@ -5,6 +5,11 @@ An Anilist plugin for FlowLauncher that currently only supports searching
 - [x] Adding anime/manga to your list
 - [x] Updating anime/manga entries from flow.
 
+Currently working on 
+- [ ] Better Error Handling
+- [ ] Profile preview and searching for other users
+- [ ] More...
+
 This project uses the AnilistNet API Wrapper (https://github.com/dentolos19/AniListNet)
 
 # Preview
