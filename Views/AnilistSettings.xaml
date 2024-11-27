@@ -3,32 +3,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:viewModels="clr-namespace:Flow.Launcher.Plugin.Anilist.ViewModels"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance viewModels:AnilistSettingsViewModel}"
+             Loaded="AnilistSettings_OnLoaded"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="60,10,60,60">
+    <Grid Margin="40,10,40,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Margin="0,10,0,10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition Width="auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="Get Token" Margin="5,0,0,0"/>
-            </Grid>
-
-            <TextBlock Text="{Binding CurrentMediaType}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,10">
+                <Image Width="50" Height="50" MaxHeight="50" MaxWidth="50" VerticalAlignment="Center" HorizontalAlignment="Center"/>  
+                <TextBlock Text="Logged in as MalificentMelon" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </StackPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="Paste your access token" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                <PasswordBox Width="250" Password="{Binding AccessToken}" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,6,6,6"/>
+                <PasswordBox Width="250" Name="AccessTokenBox" Grid.Column="1" PasswordChanged="AccessTokenBox_OnPasswordChanged" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,6,6,6"/>
                 
             </Grid>
 
@@ -38,7 +32,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="Default MediaType" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                <ComboBox SelectedItem="{Binding CurrentMediaType}" Grid.Column="1" MinWidth="250" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,6,6,6" >
+                <ComboBox Name="DefaultMediaTypeCb" SelectionChanged="DefaultMediaTypeCb_OnSelectionChanged" Grid.Column="1" MinWidth="250" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,6,6,6" >
                     <ComboBoxItem Content="Anime"/>
                     <ComboBoxItem Content="Manga"/>
                 </ComboBox>
@@ -52,7 +46,7 @@
 
                 <TextBlock Grid.Column="0" Text="Default Sort" VerticalAlignment="Center" Margin="5,0,0,0"/>
                 
-                <ComboBox SelectedItem="{Binding CurrentSortType}" MinWidth="250" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,6,6,6">   
+                <ComboBox Name="DefaultMediaSortCb" SelectionChanged="DefaultMediaSortCb_OnSelectionChanged" MinWidth="250" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,6,6,6">   
                     <ComboBoxItem Content="Relevance"/>
                     <ComboBoxItem Content="Score"/>
                     <ComboBoxItem Content="Popularity"/>
@@ -60,6 +54,10 @@
                     <ComboBoxItem Content="Favorites"/>
                 </ComboBox>
             </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="6,6,6,6">
+                <Button Name="RefreshTokenBtn" Content="Refresh Token" Click="RefreshTokenBtn_OnClick"/>
+                
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

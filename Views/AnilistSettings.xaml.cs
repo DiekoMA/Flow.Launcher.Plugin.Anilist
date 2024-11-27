@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Mime;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Flow.Launcher.Plugin.Anilist.ViewModels;
+using AniListNet.Objects;
 
 namespace Flow.Launcher.Plugin.Anilist.Views
 {
@@ -21,15 +10,42 @@ namespace Flow.Launcher.Plugin.Anilist.Views
     /// </summary>
     public partial class AnilistSettings : UserControl
     {
-        private readonly Settings _settings;
-        private readonly AnilistSettingsViewModel _viewModel;
         private readonly PluginInitContext _context;
-        public AnilistSettings(AnilistSettingsViewModel viewModel)
+        private readonly Settings _settings;
+        /// <inheritdoc />
+        public AnilistSettings(PluginInitContext context, Settings settings)
         {
             InitializeComponent();
-            _viewModel = viewModel; 
-            this.DataContext = _viewModel;
-            this.InitializeComponent();
+            _context = context; 
+            _settings = settings;
+        }
+
+        private void DefaultMediaTypeCb_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _settings.DefaultMediaType = (MediaType)DefaultMediaTypeCb.SelectedIndex;
+            _context.API.SavePluginSettings();
+        }
+
+        private void DefaultMediaSortCb_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _settings.DefaultMediaSort = (MediaSort)DefaultMediaSortCb.SelectedIndex;
+            _context.API.SavePluginSettings();
+        }
+
+        private void AnilistSettings_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            AccessTokenBox.Password = _settings?.AnilistToken ?? string.Empty;
+            DefaultMediaTypeCb.SelectedIndex = (int)_settings.DefaultMediaType;
+            DefaultMediaSortCb.SelectedIndex = (int)_settings.DefaultMediaSort;
+        }
+
+        private void RefreshTokenBtn_OnClick(object sender, RoutedEventArgs e) =>
+            _context.API.OpenUrl("https://anilist.co/api/v2/oauth/authorize?client_id=12239&response_type=token");
+        
+        private void AccessTokenBox_OnPasswordChanged(object sender, RoutedEventArgs e)
+        {
+            _settings.AnilistToken = AccessTokenBox.Password;
+            _context.API.SavePluginSettings();
         }
     }
 }
