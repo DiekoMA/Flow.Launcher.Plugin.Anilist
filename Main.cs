@@ -5,7 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using Flow.Launcher.Plugin.Anilist.Views;
+using JetBrains.Annotations;
 
 namespace Flow.Launcher.Plugin.Anilist
 {
@@ -39,12 +42,12 @@ namespace Flow.Launcher.Plugin.Anilist
                             Type = MediaType.Anime,
                             Sort = _settings.DefaultMediaSort,
                             Format = new Dictionary<MediaFormat, bool>
-                    {
-                        { MediaFormat.TV, true},
-                        { MediaFormat.Movie, true},
-                        { MediaFormat.TVShort, true},
-                        { MediaFormat.ONA, true},
-                    }
+                            {
+                                { MediaFormat.TV, true },
+                                { MediaFormat.Movie, true },
+                                { MediaFormat.TVShort, true },
+                                { MediaFormat.ONA, true },
+                            }
                         });
 
                         foreach (var anime in animeSearchResults.Result.Data)
@@ -61,6 +64,7 @@ namespace Flow.Launcher.Plugin.Anilist
                                 result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
                                                   $"Episodes: {anime.Episodes?.ToString() ?? "?"}";
                             }
+
                             result.IcoPath = anime.Cover.ExtraLargeImageUrl.ToString();
                             result.Action = e =>
                             {
@@ -71,6 +75,7 @@ namespace Flow.Launcher.Plugin.Anilist
                             result.ContextData = anime;
                             results.Add(result);
                         }
+
                         break;
                     case MediaType.Manga:
                         var mangaSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
@@ -79,10 +84,10 @@ namespace Flow.Launcher.Plugin.Anilist
                             Type = MediaType.Manga,
                             Sort = MediaSort.Popularity,
                             Format = new Dictionary<MediaFormat, bool>
-                    {
-                        { MediaFormat.Manga, true},
-                        { MediaFormat.OneShot, true}
-                    }
+                            {
+                                { MediaFormat.Manga, true },
+                                { MediaFormat.OneShot, true }
+                            }
                         });
 
                         foreach (var manga in mangaSearchResults.Result.Data)
@@ -99,7 +104,7 @@ namespace Flow.Launcher.Plugin.Anilist
                                 result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
                                                   $"Chapters: {manga.Chapters}  |  Volumes: {manga.Volumes}";
                             }
-                            
+
                             result.IcoPath = manga.Cover.ExtraLargeImageUrl.ToString();
                             result.Action = e =>
                             {
@@ -110,33 +115,24 @@ namespace Flow.Launcher.Plugin.Anilist
                             result.ContextData = manga;
                             results.Add(result);
                         }
+
                         break;
                 }
             }
-
-            /*results.Add(new Result
-            {
-                Title = "Search",
-                Action = c =>
-                {
-                    
-                    return true;
-                }
-            });*/
 
             return results;
         }
 
         public Control CreateSettingPanel()
         {
-            return new AnilistSetting(_context, _settings);
+            return new AnilistSettings(_context, _settings);
         }
 
         public List<Result> LoadContextMenus(Result selectedResult)
         {
             var results = new List<Result>();
             var media = selectedResult.ContextData as Media;
-            
+
             Func<ActionContext, ValueTask<bool>> PlusOneActionCreator(bool updateVolume)
             {
                 return async ValueTask<bool> (ActionContext c) =>
@@ -153,6 +149,7 @@ namespace Flow.Launcher.Plugin.Anilist
                                     mediaEntryMutation.Status = MediaEntryStatus.Completed;
                                     mediaEntryMutation.CompleteDate = DateTime.Now;
                                 }
+
                                 break;
                             case MediaType.Manga:
                                 // TODO: Support volume progress
@@ -164,6 +161,7 @@ namespace Flow.Launcher.Plugin.Anilist
                                 {
                                     mediaEntryMutation.Progress = media.Entry.Progress + 1;
                                 }
+
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
@@ -173,7 +171,7 @@ namespace Flow.Launcher.Plugin.Anilist
                     }
                     catch (Exception e)
                     {
-                        // ignored
+                        _context.API.ShowMsgError("Error", "There was an issue Updating your list");
                     }
 
                     return true;
@@ -186,7 +184,7 @@ namespace Flow.Launcher.Plugin.Anilist
                 if (media.Type == MediaType.Anime)
                 {
                     // Add a +1 progress option
-                    results.Add(new ()
+                    results.Add(new()
                     {
                         Title = "+1 Watched",
                         IcoPath = "Assets\\AniListLogo.png",
@@ -195,20 +193,20 @@ namespace Flow.Launcher.Plugin.Anilist
                 }
                 else
                 {
-                    results.Add(new ()
+                    results.Add(new()
                     {
                         Title = "+1 Chapter Read",
                         IcoPath = "Assets\\AniListLogo.png",
                         AsyncAction = PlusOneActionCreator(false)
                     });
-                    results.Add(new ()
+                    results.Add(new()
                     {
                         Title = "+1 Volume Read",
                         IcoPath = "Assets\\AniListLogo.png",
                         AsyncAction = PlusOneActionCreator(true)
                     });
                 }
-                
+
                 results.Add(new Result
                 {
                     Title = "Remove from list",
@@ -227,7 +225,8 @@ namespace Flow.Launcher.Plugin.Anilist
                         }
                         catch (Exception)
                         {
-                            _context.API.ShowMsgError("Not Authenticated", "Please add your token in the plugin settings");
+                            _context.API.ShowMsgError("Not Authenticated",
+                                "Please add your token in the plugin settings");
                         }
 
                         return true;
@@ -251,19 +250,48 @@ namespace Flow.Launcher.Plugin.Anilist
                                 Type = _settings.DefaultMediaType,
                                 Sort = MediaSort.Popularity
                             });
-                            await _client.SaveMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id, new MediaEntryMutation()
-                            {
-                                StartDate = DateTime.Today,
-                                Progress = 0,
-                                Status = MediaEntryStatus.Planning
-                            });
+                            await _client.SaveMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id,
+                                new MediaEntryMutation()
+                                {
+                                    StartDate = DateTime.Today,
+                                    Progress = 0,
+                                    Status = MediaEntryStatus.Planning
+                                });
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
-                            _context.API.ShowMsgError("Not Authenticated", "Please add your token in the plugin settings");
+                            results.Add(new Result()
+                            {
+                                Title = "Error" + e.Message ,
+                                SubTitle = "No access token found, please add one in the plugin settings",
+                            });
+                            /*_context.API.ShowMsgError("Not Authenticated",
+                                "Please add your token in the plugin settings");*/
                         }
+
                         return true;
                     },
+                });
+                results.Add(new Result()
+                {
+                    Title = "Copy Anilist id",
+                    IcoPath = "Assets\\AniListlogo.png",
+                    AsyncAction = async c =>
+                    {
+                        Clipboard.SetText(media.Id.ToString());
+                        return true;
+                    }
+                });
+                
+                results.Add(new Result()
+                {
+                    Title = "Copy MyAnimeList id",
+                    IcoPath = "Assets\\AniListlogo.png",
+                    AsyncAction = async c =>
+                    {
+                        Clipboard.SetText(media.MalId.ToString());
+                        return true;
+                    }
                 });
             }
 
