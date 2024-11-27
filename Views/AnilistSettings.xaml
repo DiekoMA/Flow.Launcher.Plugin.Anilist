@@ -12,10 +12,6 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Margin="0,10,0,10">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,10">
-                <Image Width="50" Height="50" MaxHeight="50" MaxWidth="50" VerticalAlignment="Center" HorizontalAlignment="Center"/>  
-                <TextBlock Text="Logged in as MalificentMelon" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </StackPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
