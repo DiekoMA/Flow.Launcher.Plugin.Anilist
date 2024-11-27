@@ -6,12 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using Flow.Launcher.Plugin.Anilist.ViewModels;
+using Flow.Launcher.Plugin.Anilist.Views;
+using JetBrains.Annotations;
 
 namespace Flow.Launcher.Plugin.Anilist
 {
     public class Anilist : IPlugin, ISettingProvider, IContextMenu
     {
         private readonly AniClient _client = new AniClient();
+        private static AnilistSettingsViewModel _viewModel;
         private PluginInitContext _context;
         private Settings _settings;
 
@@ -19,6 +23,7 @@ namespace Flow.Launcher.Plugin.Anilist
         {
             _context = context;
             _settings = context.API.LoadSettingJsonStorage<Settings>();
+            _viewModel = new AnilistSettingsViewModel(_context, _settings);
             _client.TryAuthenticateAsync(_settings.AnilistToken);
         }
 
@@ -113,23 +118,12 @@ namespace Flow.Launcher.Plugin.Anilist
                         break;
                 }
             }
-
-            /*results.Add(new Result
-            {
-                Title = "Search",
-                Action = c =>
-                {
-                    
-                    return true;
-                }
-            });*/
-
             return results;
         }
 
         public Control CreateSettingPanel()
         {
-            return new AnilistSetting(_context, _settings);
+            return new AnilistSettings(_viewModel);
         }
 
         public List<Result> LoadContextMenus(Result selectedResult)
