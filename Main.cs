@@ -6,12 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using Flow.Launcher.Plugin.Anilist.ViewModels;
+using Flow.Launcher.Plugin.Anilist.Views;
 
 namespace Flow.Launcher.Plugin.Anilist
 {
     public class Anilist : IPlugin, ISettingProvider, IContextMenu
     {
         private readonly AniClient _client = new AniClient();
+        private User authenticatedUser;
+        private static AnilistSettingsViewModel _viewModel;
         private PluginInitContext _context;
         private Settings _settings;
 
@@ -19,124 +23,200 @@ namespace Flow.Launcher.Plugin.Anilist
         {
             _context = context;
             _settings = context.API.LoadSettingJsonStorage<Settings>();
+            _viewModel = new AnilistSettingsViewModel(_context, _settings);
             _client.TryAuthenticateAsync(_settings.AnilistToken);
+            authenticatedUser = _client.GetAuthenticatedUserAsync().Result;
         }
 
         public List<Result> Query(Query query)
         {
             List<Result> results = new List<Result>();
 
-            if (query.Search.Length > 2)
+            if (query.Search.Length < 2)
             {
-                string searchQuery = query.Search;
-
-                switch (_settings.DefaultMediaType)
+                results.Add(new Result
                 {
-                    case MediaType.Anime:
-                        var animeSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
+                    Title = "Query",
+                    SubTitle = "Search for any Anime/Manga e.g al Naruto",
+                    IcoPath = "Assets\\AniListLogo.png"
+                });
+                /*results.Add(new Result
+                {
+                    Title = "User",
+                    SubTitle = "Search for a specific user",
+                    IcoPath = "Assets\\AniListLogo.png"
+                });
+                results.Add(new Result
+                {
+                    Title = "Entries",
+                    SubTitle = "Search for a specific user",
+                    IcoPath = "Assets\\AniListLogo.png",
+                });*/
+            }
+            else
+            {
+                var searchQuery = query.Search;
+                
+                switch (searchQuery)
+                {
+                    /*case "User":
+                        if (!_client.IsAuthenticated && string.IsNullOrEmpty(_settings.AnilistToken))
                         {
-                            Query = searchQuery,
-                            Type = MediaType.Anime,
-                            Sort = _settings.DefaultMediaSort,
-                            Format = new Dictionary<MediaFormat, bool>
-                    {
-                        { MediaFormat.TV, true},
-                        { MediaFormat.Movie, true},
-                        { MediaFormat.TVShort, true},
-                        { MediaFormat.ONA, true},
-                    }
-                        });
-
-                        foreach (var anime in animeSearchResults.Result.Data)
+                            results.Add(new Result()
+                            {
+                                Title = "Error",
+                                SubTitle = "Sorry, anilist user is not authenticated.",
+                            });
+                        }
+                        var userQuery = query.SecondSearch;
+                        var users = _client.SearchUserAsync(userQuery);
+                        foreach (var user in users.Result.Data)
                         {
-                            var result = new Result();
-                            result.Title = anime.Title.EnglishTitle ?? anime.Title.RomajiTitle;
-                            if (anime.Entry != null)
+                            results.Add(new Result()
                             {
-                                result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
-                                                  $"Watched: {anime.Entry?.Progress ?? 0} / {anime.Episodes}";
-                            }
-                            else
-                            {
-                                result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
-                                                  $"Episodes: {anime.Episodes?.ToString() ?? "?"}";
-                            }
-                            result.IcoPath = anime.Cover.ExtraLargeImageUrl.ToString();
-                            result.Action = e =>
-                            {
-                                string url = $"https://anilist.co/anime/{anime.Id}";
-                                _context.API.OpenUrl(url);
-                                return true;
-                            };
-                            result.ContextData = anime;
-                            results.Add(result);
+                                Title = user.Name,
+                                SubTitle = user.Id.ToString(),
+                                IcoPath = user.Avatar.LargeImageUrl.ToString()
+                            });   
                         }
                         break;
-                    case MediaType.Manga:
-                        var mangaSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
-                        {
-                            Query = searchQuery,
-                            Type = MediaType.Manga,
-                            Sort = MediaSort.Popularity,
-                            Format = new Dictionary<MediaFormat, bool>
-                    {
-                        { MediaFormat.Manga, true},
-                        { MediaFormat.OneShot, true}
-                    }
-                        });
 
-                        foreach (var manga in mangaSearchResults.Result.Data)
+                    case "Entries":
+                        if (!_client.IsAuthenticated && string.IsNullOrEmpty(_settings.AnilistToken))
                         {
-                            var result = new Result();
-                            result.Title = manga.Title.EnglishTitle ?? manga.Title.RomajiTitle;
-                            if (manga.Entry != null)
+                            results.Add(new Result()
                             {
-                                result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
-                                                  $"Chapters Read: {manga.Entry?.Progress ?? 0} / {manga.Chapters}  |  Volumes Read: {manga.Entry?.VolumeProgress ?? 0} / {manga.Volumes}";
-                            }
-                            else
-                            {
-                                result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
-                                                  $"Chapters: {manga.Chapters}  |  Volumes: {manga.Volumes}";
-                            }
-                            
-                            result.IcoPath = manga.Cover.ExtraLargeImageUrl.ToString();
-                            result.Action = e =>
-                            {
-                                string url = $"https://anilist.co/anime/{manga.Id}";
-                                _context.API.OpenUrl(url);
-                                return true;
-                            };
-                            result.ContextData = manga;
-                            results.Add(result);
+                                Title = "Error",
+                                SubTitle = "Sorry, anilist user is not authenticated.",
+                            });
                         }
+                        var userEntries = _client.GetUserEntriesAsync(authenticatedUser.Id).Result;
+                        foreach (var entry in userEntries.Data)
+                        {
+                            results.Add(new Result()
+                            {
+                                Title = entry.Media.Title.EnglishTitle ?? entry.Media.Title.RomajiTitle,
+                                SubTitle = entry.Media.Status.ToString(),
+                                IcoPath = entry.Media.Cover.ExtraLargeImageUrl.ToString()
+                            });
+                        }
+                        break;*/
+                    /*case "Stats":
+                        var userStats = _client.GetUserAsync(authenticatedUser.Id);
+                        var listData = _client.GetUserListCollectionAsync(authenticatedUser.Id, MediaType.Anime);
+                        results.Add(new Result()
+                        {
+                            Title = "Anime Stats",
+                            SubTitle = $"Total Entries: {_client.GetUserEntriesAsync(authenticatedUser.Id).Result.Data.Length}",
+                            IcoPath = "Assets\\AniListLogo.png",
+                        });
+                        Either the library doesn't support getting user stats or i'm stupid and i'm missing something
+                        break;*/
+                    
+                    default:
+                        switch (_settings.DefaultMediaType)
+                        {
+                            case MediaType.Anime:
+                                var animeSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
+                                {
+                                    Query = searchQuery,
+                                    Type = MediaType.Anime,
+                                    Sort = _settings.DefaultMediaSort,
+                                    Format = new Dictionary<MediaFormat, bool>
+                                    {
+                                        { MediaFormat.TV, true },
+                                        { MediaFormat.Movie, true },
+                                        { MediaFormat.TVShort, true },
+                                        { MediaFormat.ONA, true },
+                                    }
+                                });
+
+                                foreach (var anime in animeSearchResults.Result.Data)
+                                {
+                                    var result = new Result();
+                                    result.Title = anime.Title.EnglishTitle ?? anime.Title.RomajiTitle;
+                                    if (anime.Entry != null)
+                                    {
+                                        result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
+                                                          $"Watched: {anime.Entry?.Progress ?? 0} / {anime.Episodes}";
+                                    }
+                                    else
+                                    {
+                                        result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
+                                                          $"Episodes: {anime.Episodes?.ToString() ?? "?"}";
+                                    }
+
+                                    result.IcoPath = anime.Cover.ExtraLargeImageUrl.ToString();
+                                    result.Action = e =>
+                                    {
+                                        string url = $"https://anilist.co/anime/{anime.Id}";
+                                        _context.API.OpenUrl(url);
+                                        return true;
+                                    };
+                                    result.ContextData = anime;
+                                    results.Add(result);
+                                }
+
+                                break;
+                            case MediaType.Manga:
+                                var mangaSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
+                                {
+                                    Query = searchQuery,
+                                    Type = MediaType.Manga,
+                                    Sort = MediaSort.Popularity,
+                                    Format = new Dictionary<MediaFormat, bool>
+                                    {
+                                        { MediaFormat.Manga, true },
+                                        { MediaFormat.OneShot, true }
+                                    }
+                                });
+
+                                foreach (var manga in mangaSearchResults.Result.Data)
+                                {
+                                    var result = new Result();
+                                    result.Title = manga.Title.EnglishTitle ?? manga.Title.RomajiTitle;
+                                    if (manga.Entry != null)
+                                    {
+                                        result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
+                                                          $"Chapters Read: {manga.Entry?.Progress ?? 0} / {manga.Chapters}  |  Volumes Read: {manga.Entry?.VolumeProgress ?? 0} / {manga.Volumes}";
+                                    }
+                                    else
+                                    {
+                                        result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
+                                                          $"Chapters: {manga.Chapters}  |  Volumes: {manga.Volumes}";
+                                    }
+
+                                    result.IcoPath = manga.Cover.ExtraLargeImageUrl.ToString();
+                                    result.Action = e =>
+                                    {
+                                        string url = $"https://anilist.co/anime/{manga.Id}";
+                                        _context.API.OpenUrl(url);
+                                        return true;
+                                    };
+                                    result.ContextData = manga;
+                                    results.Add(result);
+                                }
+
+                                break;
+                        }
+
                         break;
                 }
             }
-
-            /*results.Add(new Result
-            {
-                Title = "Search",
-                Action = c =>
-                {
-                    
-                    return true;
-                }
-            });*/
 
             return results;
         }
 
         public Control CreateSettingPanel()
         {
-            return new AnilistSetting(_context, _settings);
+            return new AnilistSettings(_viewModel);
         }
 
         public List<Result> LoadContextMenus(Result selectedResult)
         {
             var results = new List<Result>();
             var media = selectedResult.ContextData as Media;
-            
+
             Func<ActionContext, ValueTask<bool>> PlusOneActionCreator(bool updateVolume)
             {
                 return async ValueTask<bool> (ActionContext c) =>
@@ -153,6 +233,7 @@ namespace Flow.Launcher.Plugin.Anilist
                                     mediaEntryMutation.Status = MediaEntryStatus.Completed;
                                     mediaEntryMutation.CompleteDate = DateTime.Now;
                                 }
+
                                 break;
                             case MediaType.Manga:
                                 // TODO: Support volume progress
@@ -164,6 +245,7 @@ namespace Flow.Launcher.Plugin.Anilist
                                 {
                                     mediaEntryMutation.Progress = media.Entry.Progress + 1;
                                 }
+
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
@@ -186,7 +268,7 @@ namespace Flow.Launcher.Plugin.Anilist
                 if (media.Type == MediaType.Anime)
                 {
                     // Add a +1 progress option
-                    results.Add(new ()
+                    results.Add(new()
                     {
                         Title = "+1 Watched",
                         IcoPath = "Assets\\AniListLogo.png",
@@ -195,20 +277,20 @@ namespace Flow.Launcher.Plugin.Anilist
                 }
                 else
                 {
-                    results.Add(new ()
+                    results.Add(new()
                     {
                         Title = "+1 Chapter Read",
                         IcoPath = "Assets\\AniListLogo.png",
                         AsyncAction = PlusOneActionCreator(false)
                     });
-                    results.Add(new ()
+                    results.Add(new()
                     {
                         Title = "+1 Volume Read",
                         IcoPath = "Assets\\AniListLogo.png",
                         AsyncAction = PlusOneActionCreator(true)
                     });
                 }
-                
+
                 results.Add(new Result
                 {
                     Title = "Remove from list",
@@ -227,7 +309,8 @@ namespace Flow.Launcher.Plugin.Anilist
                         }
                         catch (Exception)
                         {
-                            _context.API.ShowMsgError("Not Authenticated", "Please add your token in the plugin settings");
+                            _context.API.ShowMsgError("Not Authenticated",
+                                "Please add your token in the plugin settings");
                         }
 
                         return true;
@@ -251,23 +334,26 @@ namespace Flow.Launcher.Plugin.Anilist
                                 Type = _settings.DefaultMediaType,
                                 Sort = MediaSort.Popularity
                             });
-                            await _client.SaveMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id, new MediaEntryMutation()
-                            {
-                                StartDate = DateTime.Today,
-                                Progress = 0,
-                                Status = MediaEntryStatus.Planning
-                            });
+                            await _client.SaveMediaEntryAsync(anilistEntry.Data.FirstOrDefault()!.Id,
+                                new MediaEntryMutation()
+                                {
+                                    StartDate = DateTime.Today,
+                                    Progress = 0,
+                                    Status = MediaEntryStatus.Planning
+                                });
                         }
                         catch (Exception)
                         {
-                            _context.API.ShowMsgError("Not Authenticated", "Please add your token in the plugin settings");
+                            _context.API.ShowMsgError("Not Authenticated",
+                                "Please add your token in the plugin settings");
                         }
+
                         return true;
                     },
                 });
             }
-
             return results;
         }
     }
+    // string[] EasterEgg = new[] { "What", "Are", "You", "Looking", "For", "Down", "Here"};
 }

@@ -1,4 +1,5 @@
-﻿using AniListNet.Objects;
+﻿using System.Security;
+using AniListNet.Objects;
 
 namespace Flow.Launcher.Plugin.Anilist;
 
