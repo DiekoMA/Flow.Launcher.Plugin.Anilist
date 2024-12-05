@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using Flow.Launcher.Plugin.Anilist.ViewModels;
 
