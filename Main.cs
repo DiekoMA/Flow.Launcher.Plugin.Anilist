@@ -24,8 +24,104 @@ namespace Flow.Launcher.Plugin.Anilist
             _context = context;
             _settings = context.API.LoadSettingJsonStorage<Settings>();
             _viewModel = new AnilistSettingsViewModel(_context, _settings);
-            _client.TryAuthenticateAsync(_settings.AnilistToken);
-            authenticatedUser = _client.GetAuthenticatedUserAsync().Result;
+            if (_settings.AnilistToken is not null)
+            {
+                _client.TryAuthenticateAsync(_settings.AnilistToken);
+                authenticatedUser = _client.GetAuthenticatedUserAsync().Result;
+            }
+        }
+
+        private List<Result> SearchAnime(string searchQuery)
+        {
+            List<Result> results = new List<Result>();
+            var animeSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
+            {
+                Query = searchQuery,
+                Type = MediaType.Anime,
+                Sort = _settings.DefaultMediaSort,
+                Format = new Dictionary<MediaFormat, bool>
+                                    {
+                                        { MediaFormat.TV, true },
+                                        { MediaFormat.Movie, true },
+                                        { MediaFormat.TVShort, true },
+                                        { MediaFormat.ONA, true },
+                                    }
+            });
+
+            foreach (var anime in animeSearchResults.Result.Data)
+            {
+                var result = new Result();
+                result.Title = anime.Title.EnglishTitle ?? anime.Title.RomajiTitle;
+                if (anime.Entry != null)
+                {
+                    result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
+                                      $"Watched: {anime.Entry?.Progress ?? 0} / {anime.Episodes}";
+                }
+                else
+                {
+                    result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
+                                      $"Episodes: {anime.Episodes?.ToString() ?? "?"}";
+                }
+
+                result.IcoPath = anime.Cover.ExtraLargeImageUrl.ToString();
+                result.Preview = new Result.PreviewInfo { IsMedia = true, PreviewImagePath = anime.Cover.ExtraLargeImageUrl.ToString() };
+                result.Action = e =>
+                {
+                    string url = $"https://anilist.co/anime/{anime.Id}";
+                    _context.API.OpenUrl(url);
+                    return true;
+                };
+                result.CopyText = $"https://anilist.co/anime/{anime.Id}";
+                result.ContextData = anime;
+                results.Add(result);
+            }
+            return results;
+        }
+
+        private List<Result> SearchManga(string searchQuery)
+        {
+            List<Result> results = new List<Result>();
+
+            var mangaSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
+            {
+                Query = searchQuery,
+                Type = MediaType.Manga,
+                Sort = MediaSort.Popularity,
+                Format = new Dictionary<MediaFormat, bool>
+                                    {
+                                        { MediaFormat.Manga, true },
+                                        { MediaFormat.OneShot, true }
+                                    }
+            });
+
+            foreach (var manga in mangaSearchResults.Result.Data)
+            {
+                var result = new Result();
+                result.Title = manga.Title.EnglishTitle ?? manga.Title.RomajiTitle;
+                if (manga.Entry != null)
+                {
+                    result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
+                                      $"Chapters Read: {manga.Entry?.Progress ?? 0} / {manga.Chapters}  |  Volumes Read: {manga.Entry?.VolumeProgress ?? 0} / {manga.Volumes}";
+                }
+                else
+                {
+                    result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
+                                      $"Chapters: {manga.Chapters}  |  Volumes: {manga.Volumes}";
+                }
+
+                result.IcoPath = manga.Cover.ExtraLargeImageUrl.ToString();
+                result.Preview = new Result.PreviewInfo { IsMedia=true, PreviewImagePath= manga.Cover.ExtraLargeImageUrl.ToString() };
+                result.Action = e =>
+                {
+                    string url = $"https://anilist.co/manga/{manga.Id}";
+                    _context.API.OpenUrl(url);
+                    return true;
+                };
+                result.CopyText = $"https://anilist.co/manga/{manga.Id}";
+                result.ContextData = manga;
+                results.Add(result);
+            }
+            return results;
         }
 
         public List<Result> Query(Query query)
@@ -114,88 +210,33 @@ namespace Flow.Launcher.Plugin.Anilist
                         break;*/
                     
                     default:
-                        switch (_settings.DefaultMediaType)
+                        // Figuring out current MediaType
+                        MediaType currentMediaType;
+                        if (searchQuery.ToLower().StartsWith("a:") || searchQuery.ToLower().StartsWith("m:"))
+                            switch (searchQuery.ToLower().Substring(0, 2))
+                            {
+                                case "a:":
+                                    currentMediaType = MediaType.Anime;
+                                    searchQuery = searchQuery.Substring(2).Trim();
+                                    break;
+                                case "m:":
+                                    currentMediaType = MediaType.Manga;
+                                    searchQuery = searchQuery.Substring(2).Trim();
+                                    break;
+                                default:
+                                    currentMediaType = _settings.DefaultMediaType;
+                                    break;
+                            }
+                        else
+                            currentMediaType = _settings.DefaultMediaType;
+                        switch (currentMediaType)
                         {
                             case MediaType.Anime:
-                                var animeSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
-                                {
-                                    Query = searchQuery,
-                                    Type = MediaType.Anime,
-                                    Sort = _settings.DefaultMediaSort,
-                                    Format = new Dictionary<MediaFormat, bool>
-                                    {
-                                        { MediaFormat.TV, true },
-                                        { MediaFormat.Movie, true },
-                                        { MediaFormat.TVShort, true },
-                                        { MediaFormat.ONA, true },
-                                    }
-                                });
-
-                                foreach (var anime in animeSearchResults.Result.Data)
-                                {
-                                    var result = new Result();
-                                    result.Title = anime.Title.EnglishTitle ?? anime.Title.RomajiTitle;
-                                    if (anime.Entry != null)
-                                    {
-                                        result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
-                                                          $"Watched: {anime.Entry?.Progress ?? 0} / {anime.Episodes}";
-                                    }
-                                    else
-                                    {
-                                        result.SubTitle = $"Format: {anime.Format}  |  Status: {anime.Status} \n" +
-                                                          $"Episodes: {anime.Episodes?.ToString() ?? "?"}";
-                                    }
-
-                                    result.IcoPath = anime.Cover.ExtraLargeImageUrl.ToString();
-                                    result.Action = e =>
-                                    {
-                                        string url = $"https://anilist.co/anime/{anime.Id}";
-                                        _context.API.OpenUrl(url);
-                                        return true;
-                                    };
-                                    result.ContextData = anime;
-                                    results.Add(result);
-                                }
+                                results.AddRange(SearchAnime(searchQuery));
 
                                 break;
                             case MediaType.Manga:
-                                var mangaSearchResults = _client.SearchMediaAsync(new SearchMediaFilter
-                                {
-                                    Query = searchQuery,
-                                    Type = MediaType.Manga,
-                                    Sort = MediaSort.Popularity,
-                                    Format = new Dictionary<MediaFormat, bool>
-                                    {
-                                        { MediaFormat.Manga, true },
-                                        { MediaFormat.OneShot, true }
-                                    }
-                                });
-
-                                foreach (var manga in mangaSearchResults.Result.Data)
-                                {
-                                    var result = new Result();
-                                    result.Title = manga.Title.EnglishTitle ?? manga.Title.RomajiTitle;
-                                    if (manga.Entry != null)
-                                    {
-                                        result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
-                                                          $"Chapters Read: {manga.Entry?.Progress ?? 0} / {manga.Chapters}  |  Volumes Read: {manga.Entry?.VolumeProgress ?? 0} / {manga.Volumes}";
-                                    }
-                                    else
-                                    {
-                                        result.SubTitle = $"Format: {manga.Format}  |  Status: {manga.Status} \n" +
-                                                          $"Chapters: {manga.Chapters}  |  Volumes: {manga.Volumes}";
-                                    }
-
-                                    result.IcoPath = manga.Cover.ExtraLargeImageUrl.ToString();
-                                    result.Action = e =>
-                                    {
-                                        string url = $"https://anilist.co/anime/{manga.Id}";
-                                        _context.API.OpenUrl(url);
-                                        return true;
-                                    };
-                                    result.ContextData = manga;
-                                    results.Add(result);
-                                }
+                                results.AddRange(SearchManga(searchQuery));
 
                                 break;
                         }
