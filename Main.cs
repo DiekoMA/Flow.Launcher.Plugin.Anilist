@@ -136,110 +136,51 @@ namespace Flow.Launcher.Plugin.Anilist
                     SubTitle = "Search for any Anime/Manga e.g al Naruto",
                     IcoPath = "Assets\\AniListLogo.png"
                 });
-                /*results.Add(new Result
-                {
-                    Title = "User",
-                    SubTitle = "Search for a specific user",
-                    IcoPath = "Assets\\AniListLogo.png"
-                });
+                
                 results.Add(new Result
                 {
-                    Title = "Entries",
-                    SubTitle = "Search for a specific user",
-                    IcoPath = "Assets\\AniListLogo.png",
-                });*/
+                    Title = "a:<Anime>",
+                    SubTitle = "Search for any Anime e.g al a:My Hero",
+                    IcoPath = "Assets\\AniListLogo.png"
+                });
+                
+                results.Add(new Result
+                {
+                    Title = "m:<Manga>",
+                    SubTitle = "Search for Manga e.g al m:kagurabachi",
+                    IcoPath = "Assets\\AniListLogo.png"
+                });
             }
             else
             {
                 var searchQuery = query.Search;
                 
-                switch (searchQuery)
-                {
-                    /*case "User":
-                        if (!_client.IsAuthenticated && string.IsNullOrEmpty(_settings.AnilistToken))
-                        {
-                            results.Add(new Result()
-                            {
-                                Title = "Error",
-                                SubTitle = "Sorry, anilist user is not authenticated.",
-                            });
-                        }
-                        var userQuery = query.SecondSearch;
-                        var users = _client.SearchUserAsync(userQuery);
-                        foreach (var user in users.Result.Data)
-                        {
-                            results.Add(new Result()
-                            {
-                                Title = user.Name,
-                                SubTitle = user.Id.ToString(),
-                                IcoPath = user.Avatar.LargeImageUrl.ToString()
-                            });   
-                        }
-                        break;
-
-                    case "Entries":
-                        if (!_client.IsAuthenticated && string.IsNullOrEmpty(_settings.AnilistToken))
-                        {
-                            results.Add(new Result()
-                            {
-                                Title = "Error",
-                                SubTitle = "Sorry, anilist user is not authenticated.",
-                            });
-                        }
-                        var userEntries = _client.GetUserEntriesAsync(authenticatedUser.Id).Result;
-                        foreach (var entry in userEntries.Data)
-                        {
-                            results.Add(new Result()
-                            {
-                                Title = entry.Media.Title.EnglishTitle ?? entry.Media.Title.RomajiTitle,
-                                SubTitle = entry.Media.Status.ToString(),
-                                IcoPath = entry.Media.Cover.ExtraLargeImageUrl.ToString()
-                            });
-                        }
-                        break;*/
-                    /*case "Stats":
-                        var userStats = _client.GetUserAsync(authenticatedUser.Id);
-                        var listData = _client.GetUserListCollectionAsync(authenticatedUser.Id, MediaType.Anime);
-                        results.Add(new Result()
-                        {
-                            Title = "Anime Stats",
-                            SubTitle = $"Total Entries: {_client.GetUserEntriesAsync(authenticatedUser.Id).Result.Data.Length}",
-                            IcoPath = "Assets\\AniListLogo.png",
-                        });
-                        Either the library doesn't support getting user stats or i'm stupid and i'm missing something
-                        break;*/
-                    
-                    default:
-                        // Figuring out current MediaType
-                        MediaType currentMediaType;
-                        if (searchQuery.ToLower().StartsWith("a:") || searchQuery.ToLower().StartsWith("m:"))
-                            switch (searchQuery.ToLower().Substring(0, 2))
-                            {
-                                case "a:":
-                                    currentMediaType = MediaType.Anime;
-                                    searchQuery = searchQuery.Substring(2).Trim();
-                                    break;
-                                case "m:":
-                                    currentMediaType = MediaType.Manga;
-                                    searchQuery = searchQuery.Substring(2).Trim();
-                                    break;
-                                default:
-                                    currentMediaType = _settings.DefaultMediaType;
-                                    break;
-                            }
-                        else
+                MediaType currentMediaType;
+                if (searchQuery.ToLower().StartsWith("a:") || searchQuery.ToLower().StartsWith("m:"))
+                    switch (searchQuery.ToLower().Substring(0, 2))
+                    {
+                        case "a:":
+                            currentMediaType = MediaType.Anime;
+                            searchQuery = searchQuery.Substring(2).Trim();
+                            break;
+                        case "m:":
+                            currentMediaType = MediaType.Manga;
+                            searchQuery = searchQuery.Substring(2).Trim();
+                            break;
+                        default:
                             currentMediaType = _settings.DefaultMediaType;
-                        switch (currentMediaType)
-                        {
-                            case MediaType.Anime:
-                                results.AddRange(SearchAnime(searchQuery));
+                            break;
+                    }
+                else
+                    currentMediaType = _settings.DefaultMediaType;
+                switch (currentMediaType)
+                {
+                    case MediaType.Anime:
+                        results.AddRange(SearchAnime(searchQuery));
 
-                                break;
-                            case MediaType.Manga:
-                                results.AddRange(SearchManga(searchQuery));
-
-                                break;
-                        }
+                        break;
+                    case MediaType.Manga:
+                        results.AddRange(SearchManga(searchQuery));
 
                         break;
                 }
