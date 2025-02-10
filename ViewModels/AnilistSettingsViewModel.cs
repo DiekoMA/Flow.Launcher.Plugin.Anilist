@@ -11,21 +11,6 @@ namespace Flow.Launcher.Plugin.Anilist.ViewModels;
 
 public class AnilistSettingsViewModel : ObservableObject
 {
-    private MediaType _currentMediaType;
-
-    public MediaType CurrentMediaType
-    {
-        get => _currentMediaType;
-        set
-        {
-            if (SetProperty(ref _currentMediaType, value))
-            {
-                _settings.DefaultMediaType = value;
-                _context.API.SavePluginSettings();
-            }
-        }
-    }
-    
     private MediaSort _currentMediaSort;
 
     public MediaSort CurrentMediaSort
@@ -58,8 +43,6 @@ public class AnilistSettingsViewModel : ObservableObject
 
     private PluginInitContext _context;
     private Settings _settings;
-    
-    public List<MediaType> MediaTypes { get; } = Enum.GetValues(typeof(MediaType)).Cast<MediaType>().ToList();
     public List<MediaSort> MediaSort { get; } = Enum.GetValues(typeof(MediaSort)).Cast<MediaSort>().ToList();
     public IRelayCommand LaunchUrlCommand { get; }
 
@@ -67,6 +50,7 @@ public class AnilistSettingsViewModel : ObservableObject
     {
         this._context = context;
         this._settings = settings;
+        CurrentMediaSort = AniListNet.Objects.MediaSort.Relevance;
         LaunchUrlCommand = new RelayCommand(LaunchUrl);
     }
 

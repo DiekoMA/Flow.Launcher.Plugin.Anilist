@@ -23,12 +23,6 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Paste your access token" VerticalAlignment="Center" Margin="5,0,0,0" />
             <TextBox Grid.Row="0" Text="{Binding AccessToken}" Grid.Column="1"
                           HorizontalAlignment="Stretch" MaxWidth="300" VerticalAlignment="Center" Margin="6,6,6,6" />
-
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Default MediaType" VerticalAlignment="Center" Margin="5,0,0,0" />
-            <ComboBox Grid.Row="1" ItemsSource="{Binding MediaTypes }" SelectedItem="{Binding CurrentMediaType}" Grid.Column="1"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="6,6,6,6">
-            </ComboBox>
-
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Sort" VerticalAlignment="Center" Margin="5,0,0,0" />
 
             <ComboBox Grid.Row="2" ItemsSource="{Binding MediaSort}" SelectedItem="{Binding CurrentMediaSort}" Grid.Column="1"

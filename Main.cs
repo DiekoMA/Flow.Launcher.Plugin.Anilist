@@ -29,6 +29,7 @@ namespace Flow.Launcher.Plugin.Anilist
                 _client.TryAuthenticateAsync(_settings.AnilistToken);
                 authenticatedUser = _client.GetAuthenticatedUserAsync().Result;
             }
+            
         }
 
         private List<Result> SearchAnime(string searchQuery)
@@ -40,12 +41,12 @@ namespace Flow.Launcher.Plugin.Anilist
                 Type = MediaType.Anime,
                 Sort = _settings.DefaultMediaSort,
                 Format = new Dictionary<MediaFormat, bool>
-                                    {
-                                        { MediaFormat.TV, true },
-                                        { MediaFormat.Movie, true },
-                                        { MediaFormat.TVShort, true },
-                                        { MediaFormat.ONA, true },
-                                    }
+                { 
+                    { MediaFormat.TV, true }, 
+                    { MediaFormat.Movie, true }, 
+                    { MediaFormat.TVShort, true }, 
+                    { MediaFormat.ONA, true },
+                }
             });
 
             foreach (var anime in animeSearchResults.Result.Data)
@@ -67,7 +68,7 @@ namespace Flow.Launcher.Plugin.Anilist
                 result.Preview = new Result.PreviewInfo { IsMedia = true, PreviewImagePath = anime.Cover.ExtraLargeImageUrl.ToString() };
                 result.Action = e =>
                 {
-                    string url = $"https://anilist.co/anime/{anime.Id}";
+                    var url = $"https://anilist.co/anime/{anime.Id}";
                     _context.API.OpenUrl(url);
                     return true;
                 };
@@ -88,10 +89,10 @@ namespace Flow.Launcher.Plugin.Anilist
                 Type = MediaType.Manga,
                 Sort = MediaSort.Popularity,
                 Format = new Dictionary<MediaFormat, bool>
-                                    {
-                                        { MediaFormat.Manga, true },
-                                        { MediaFormat.OneShot, true }
-                                    }
+                {
+                    { MediaFormat.Manga, true },
+                    { MediaFormat.OneShot, true }
+                }
             });
 
             foreach (var manga in mangaSearchResults.Result.Data)
@@ -113,7 +114,7 @@ namespace Flow.Launcher.Plugin.Anilist
                 result.Preview = new Result.PreviewInfo { IsMedia=true, PreviewImagePath= manga.Cover.ExtraLargeImageUrl.ToString() };
                 result.Action = e =>
                 {
-                    string url = $"https://anilist.co/manga/{manga.Id}";
+                    var url = $"https://anilist.co/manga/{manga.Id}";
                     _context.API.OpenUrl(url);
                     return true;
                 };
@@ -124,6 +125,38 @@ namespace Flow.Launcher.Plugin.Anilist
             return results;
         }
 
+        private List<Result> SearchCharacters(string searchQuery)
+        {
+            List<Result> results = new List<Result>();
+
+            var characterSearchResults = _client.SearchCharacterAsync(new SearchCharacterFilter()
+            {
+                Query = searchQuery,
+                Sort = CharacterSort.Relevance,
+            });
+
+            foreach (var character in characterSearchResults.Result.Data)
+            {
+                var result = new Result();
+                result.Title = character.Name.FullName;
+                result.SubTitle =
+                    $"Age: {character.Age ?? null}\n" +
+                    $"Gender: {character.Gender ?? "N/a"}\n";
+                result.IcoPath = character.Image.LargeImageUrl.ToString();
+                result.Preview = new Result.PreviewInfo { IsMedia=true, PreviewImagePath= character.Image.LargeImageUrl.ToString() };
+                result.Action = e =>
+                {
+                    var url = $"https://anilist.co/character/{character.Id}/{character.Name.FullName}";
+                    _context.API.OpenUrl(url);
+                    return true;
+                };
+                result.CopyText = $"https://anilist.co/manga/{character.Name.FullName}";
+                result.ContextData = character;
+                results.Add(result);
+            }
+            return results;
+        }
+        
         public List<Result> Query(Query query)
         {
             List<Result> results = new List<Result>();
@@ -132,58 +165,42 @@ namespace Flow.Launcher.Plugin.Anilist
             {
                 results.Add(new Result
                 {
-                    Title = "Query",
-                    SubTitle = "Search for any Anime/Manga e.g al Naruto",
-                    IcoPath = "Assets\\AniListLogo.png"
-                });
-                
-                results.Add(new Result
-                {
                     Title = "a:<Anime>",
                     SubTitle = "Search for any Anime e.g al a:My Hero",
                     IcoPath = "Assets\\AniListLogo.png"
                 });
-                
                 results.Add(new Result
                 {
                     Title = "m:<Manga>",
-                    SubTitle = "Search for Manga e.g al m:kagurabachi",
+                    SubTitle = "Search for Manga e.g al m:Kagurabachi",
+                    IcoPath = "Assets\\AniListLogo.png"
+                });
+                results.Add(new Result
+                {
+                    Title = "c:<Character>",
+                    SubTitle = "Search for any Character e.g al c:Rimuru",
                     IcoPath = "Assets\\AniListLogo.png"
                 });
             }
             else
             {
                 var searchQuery = query.Search;
-                
-                MediaType currentMediaType;
-                if (searchQuery.ToLower().StartsWith("a:") || searchQuery.ToLower().StartsWith("m:"))
+                if (searchQuery.ToLower().StartsWith("a:") || searchQuery.ToLower().StartsWith("m:") || searchQuery.ToLower().StartsWith("c:") || searchQuery.ToLower().StartsWith("u:"))
                     switch (searchQuery.ToLower().Substring(0, 2))
                     {
                         case "a:":
-                            currentMediaType = MediaType.Anime;
                             searchQuery = searchQuery.Substring(2).Trim();
+                            results.AddRange(SearchAnime(searchQuery));
                             break;
                         case "m:":
-                            currentMediaType = MediaType.Manga;
                             searchQuery = searchQuery.Substring(2).Trim();
+                            results.AddRange(SearchManga(searchQuery));
                             break;
-                        default:
-                            currentMediaType = _settings.DefaultMediaType;
+                        case "c:":
+                            searchQuery = searchQuery.Substring(2).Trim();
+                            results.AddRange(SearchCharacters(searchQuery));
                             break;
                     }
-                else
-                    currentMediaType = _settings.DefaultMediaType;
-                switch (currentMediaType)
-                {
-                    case MediaType.Anime:
-                        results.AddRange(SearchAnime(searchQuery));
-
-                        break;
-                    case MediaType.Manga:
-                        results.AddRange(SearchManga(searchQuery));
-
-                        break;
-                }
             }
 
             return results;
