@@ -4,7 +4,7 @@
     "Name": "Anilist",
     "Description": "An Anilist plugin for Flow-Launcher",
     "Author": "DiekoMA",
-    "Version": "1.0.6",
+    "Version": "1.0.7",
     "Language": "csharp",
     "Website": "https://github.com/DiekoMA/Flow.Launcher.Plugin.Anilist",
     "IcoPath": "Assets\\AniListlogo.png",
