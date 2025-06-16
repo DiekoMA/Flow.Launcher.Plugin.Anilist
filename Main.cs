@@ -65,7 +65,7 @@ namespace Flow.Launcher.Plugin.Anilist
                 }
 
                 result.IcoPath = anime.Cover.ExtraLargeImageUrl.ToString();
-                result.Preview = new Result.PreviewInfo { IsMedia = true, PreviewImagePath = anime.Cover.ExtraLargeImageUrl.ToString() };
+                result.PreviewPanel = new Lazy<UserControl>(() => new AnilistPreview(new AnilistPreviewViewModel(anime)));
                 result.Action = e =>
                 {
                     var url = $"https://anilist.co/anime/{anime.Id}";
@@ -98,6 +98,7 @@ namespace Flow.Launcher.Plugin.Anilist
             foreach (var manga in mangaSearchResults.Result.Data)
             {
                 var result = new Result();
+                
                 result.Title = manga.Title.EnglishTitle ?? manga.Title.RomajiTitle;
                 if (manga.Entry != null)
                 {
@@ -110,8 +111,8 @@ namespace Flow.Launcher.Plugin.Anilist
                                       $"Chapters: {manga.Chapters}  |  Volumes: {manga.Volumes}";
                 }
 
-                result.IcoPath = manga.Cover.ExtraLargeImageUrl.ToString();
-                result.Preview = new Result.PreviewInfo { IsMedia=true, PreviewImagePath= manga.Cover.ExtraLargeImageUrl.ToString() };
+                result.IcoPath = manga.Cover.MediumImageUrl.ToString();
+                result.PreviewPanel = new Lazy<UserControl>(() => new AnilistPreview(new AnilistPreviewViewModel(manga)));
                 result.Action = e =>
                 {
                     var url = $"https://anilist.co/manga/{manga.Id}";
@@ -139,11 +140,8 @@ namespace Flow.Launcher.Plugin.Anilist
             {
                 var result = new Result();
                 result.Title = character.Name.FullName;
-                result.SubTitle =
-                    $"Age: {character.Age ?? null}\n" +
-                    $"Gender: {character.Gender ?? "N/a"}\n";
                 result.IcoPath = character.Image.LargeImageUrl.ToString();
-                result.Preview = new Result.PreviewInfo { IsMedia=true, PreviewImagePath= character.Image.LargeImageUrl.ToString() };
+                result.PreviewPanel = new Lazy<UserControl>(() => new AnilistCharacterPreview(new AnilistCharacterPreviewViewModel(character)));
                 result.Action = e =>
                 {
                     var url = $"https://anilist.co/character/{character.Id}/{character.Name.FullName}";

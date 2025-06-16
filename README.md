@@ -21,8 +21,11 @@ This project uses the AnilistNet API Wrapper (https://github.com/dentolos19/AniL
 
 
 # Preview
-![image](https://github.com/DiekoMA/Flow.Launcher.Plugin.Anilist/assets/70532397/6c76070c-ce7c-4e72-a87b-33cabdee8b7a)
+### Anime Search
+![Presentation1.png](Assets/Presentation/Presentation1.png)
 
+### Manga Search
+![Presentation2.png](Assets/Presentation/Presentation2.png)
 
-https://github.com/DiekoMA/Flow.Launcher.Plugin.Anilist/assets/70532397/8189fea6-0f07-48d4-9c2c-8c2bda81ccbc
-
+### Character Search
+![Presentation3.png](Assets/Presentation/Presentation3.png)
