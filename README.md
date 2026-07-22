@@ -6,7 +6,6 @@ An Anilist plugin for FlowLauncher that currently only supports searching
 - [x] Updating anime/manga entries from flow.
 
 This project uses the AnilistNet API Wrapper (https://github.com/dentolos19/AniListNet)
-If you use Powertoys CMD Pal, i've ported the extension to that as well, it should be have the same feature set as this and you can find it here [AnilistCMDPal](https://github.com/DiekoMA/AnilistExt) 
 
 ### Search
 
